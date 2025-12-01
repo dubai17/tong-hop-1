@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Trị Doanh Nghiệp PRO (Final v8)</title>
+    <title>Hệ Thống Quản Trị Doanh Nghiệp PRO (Final Fix CRM)</title>
     <style>
         :root {
             --primary-color: #007bff; --secondary-color: #6c757d; --success-color: #28a745;
@@ -41,11 +41,18 @@
 
         /* CRM STYLES */
         .crm-sidebar { overflow-y: auto; border-right: 1px solid #eee; padding-right: 10px; }
-        .crm-detail { overflow-y: auto; padding-left: 10px; }
-        .cust-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
-        .cust-item:hover, .cust-item.active { background-color: #eef7ff; border-left: 3px solid var(--primary-color); }
-        .cust-name { font-weight: bold; font-size: 14px; }
-        .cust-phone { font-size: 12px; color: #666; }
+        .crm-detail { overflow-y: auto; padding-left: 20px; }
+        .cust-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; border-radius: 4px; margin-bottom: 5px; background: #fff;}
+        .cust-item:hover { background-color: #f8f9fa; }
+        .cust-item.active { background-color: #eef7ff; border-left: 4px solid var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .cust-name { font-weight: bold; font-size: 15px; margin-bottom: 3px;}
+        .cust-phone { font-size: 13px; color: #666; display: flex; align-items: center; gap: 5px;}
+        
+        /* CRM INFO BOX */
+        .crm-info-box { display: flex; gap: 20px; margin-bottom: 20px; }
+        .crm-stat-card { flex: 1; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .crm-stat-card h4 { margin: 0 0 5px 0; font-size: 13px; color: #777; font-weight: normal; text-transform: uppercase; }
+        .crm-stat-card div { font-size: 20px; font-weight: bold; color: var(--primary-color); }
 
         /* FORM & BUTTONS */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
@@ -94,7 +101,7 @@
         .progress-bar { height: 100%; border-radius: 4px; text-align: center; color: white; font-size: 11px; line-height: 20px; transition: width 0.5s; }
         .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;}
         
-        /* UPDATE V8: Custom Date Range Style */
+        /* Custom Date Range Style */
         .custom-filter-container { display: none; background: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; gap: 10px; align-items: center; margin-left: 10px; }
         .custom-filter-container.active { display: flex; }
 
@@ -210,15 +217,21 @@
     </div>
 
     <div id="tab-customers" class="tab-pane">
-        <div class="card" style="height: 100%;">
+        <div class="card" style="height: 100%; overflow: hidden;">
             <div class="crm-layout">
                 <div class="crm-sidebar">
-                    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                        <input type="text" id="crmSearch" class="form-control" placeholder="🔍 Tìm SĐT..." oninput="renderCrmSidebar()">
+                    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                        <input type="text" id="crmSearch" class="form-control" placeholder="🔍 Tìm SĐT hoặc Tên..." oninput="renderCrmSidebar()">
                     </div>
                     <div id="crmCustomerList"></div>
                 </div>
-                <div class="crm-detail" id="crmDetailView"><div style="text-align: center; color: #888; margin-top: 50px;"><h3>👈 Chọn khách hàng để xem</h3></div></div>
+                <div class="crm-detail" id="crmDetailView">
+                    <div style="text-align: center; color: #888; margin-top: 100px;">
+                        <span style="font-size: 50px;">👥</span>
+                        <h3>Chọn một khách hàng từ danh sách bên trái</h3>
+                        <p>Thông tin chi tiết và lịch sử đơn hàng sẽ hiển thị ở đây.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -252,7 +265,14 @@
                 </div>
                 
                 <datalist id="productListStock"></datalist>
-                <table id="stockEntryTable" style="margin-bottom: 15px;"><thead><tr><th style="width: 35%">Tên SP (Gợi ý)</th><th style="width: 15%">SL</th><th style="width: 25%">Giá vốn</th><th style="width: 15%">Ghi chú</th><th style="width: 10%"></th></tr></thead><tbody id="stockEntryBody"></tbody></table><button class="btn btn-secondary btn-sm" onclick="createStockRow()">➕ Thêm dòng</button><button class="btn btn-success" style="float: right;" onclick="submitStockEntry()">✅ NHẬP KHO</button>
+                <table id="stockEntryTable" style="margin-bottom: 15px;"><thead><tr><th style="width: 35%">Tên SP (Gợi ý)</th><th style="width: 15%">SL</th><th style="width: 25%">Giá vốn</th><th style="width: 15%">Ghi chú</th><th style="width: 10%"></th></tr></thead><tbody id="stockEntryBody"></tbody></table>
+                <div style="display: flex; justify-content: space-between;">
+                    <button class="btn btn-secondary btn-sm" onclick="createStockRow()">➕ Thêm dòng</button>
+                    <div>
+                         <button class="btn btn-warning" onclick="syncWithGoogleSheets()">☁️ Đồng bộ từ Sheet</button>
+                         <button class="btn btn-success" onclick="submitStockEntry()">✅ NHẬP KHO</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card">
@@ -317,6 +337,9 @@
     // --- CẤU HÌNH KHÓA DỮ LIỆU ---
     const KEYS = { STOCK: 'inventory_stock', ORDERS: 'daily_orders', CUSTOMERS: 'customer_list', STAFF: 'sales_staff', SUPPLIERS: 'suppliers_list', CASHFLOW: 'cashflow_data' };
     
+    // --- CẤU HÌNH GOOGLE SHEETS (Thay URL của bạn vào đây) ---
+    const GOOGLE_SCRIPT_URL = 'THAY_LINK_WEB_APP_CUA_BAN_VAO_DAY'; 
+
     // --- HÀM TIỆN ÍCH ---
     const loadData = (key) => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } };
     const saveData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
@@ -358,205 +381,246 @@
         if(tabId === 'tab-reports') filterReports(currentReportPeriod || 'today'); 
     };
 
-    // --- LOGIC BÁO CÁO MỚI (V8: DATE RANGE) ---
-    let currentReportPeriod = 'today'; 
-
-    const toggleCustomFilter = () => {
-        const area = document.getElementById('customFilterArea');
-        const btn = document.getElementById('btn-custom');
-        if (area.classList.contains('active')) {
-            area.classList.remove('active');
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-secondary');
-        } else {
-            area.classList.add('active');
-            // Không active nút vội, đợi bấm "Lọc"
+    // --- GOOGLE SHEETS SYNC ---
+    const syncWithGoogleSheets = async () => {
+        if(GOOGLE_SCRIPT_URL.includes('THAY_LINK')) {
+            alert('Bạn chưa cấu hình link Google Apps Script trong code!');
+            return;
         }
+        if(!confirm('Hành động này sẽ nhập thêm hàng từ Google Sheets vào kho hiện tại. Tiếp tục?')) return;
+        try {
+            const btn = event.target; const oldText = btn.textContent;
+            btn.textContent = "⏳ Đang tải..."; btn.disabled = true;
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await response.json();
+            let stock = loadData(KEYS.STOCK); let count = 0;
+            data.forEach(item => {
+                if(item.name && item.qty > 0) {
+                    let exist = stock.find(s => s.name === item.name && parseFloat(s.costPrice) === parseFloat(item.cost));
+                    if(exist) { exist.quantityIn += parseInt(item.qty); if(item.supplier) exist.supplier = item.supplier; } 
+                    else { stock.push({ name: item.name, quantityIn: parseInt(item.qty), quantityOut: 0, costPrice: parseFloat(item.cost), supplier: item.supplier || '', note: 'Nhập từ Sheets' }); }
+                    count++;
+                }
+            });
+            saveData(KEYS.STOCK, stock); renderInventory(); updateProductDatalist('productListStock');
+            alert(`Đã đồng bộ thành công ${count} dòng dữ liệu từ Sheet!`);
+            btn.textContent = oldText; btn.disabled = false;
+        } catch (error) { console.error(error); alert('Lỗi kết nối Google Sheets!'); event.target.textContent = "☁️ Đồng bộ từ Sheet"; event.target.disabled = false; }
     };
 
-    const filterReports = (period) => {
-        currentReportPeriod = period;
+    // --- LOGIC CRM (KHÁCH HÀNG) ---
+    const renderCrmSidebar = () => {
+        const listDiv = document.getElementById('crmCustomerList');
+        const term = document.getElementById('crmSearch').value.toLowerCase().trim();
+        let customers = loadData(KEYS.CUSTOMERS);
         
-        // UI Handling
-        ['btn-today','btn-week','btn-month','btn-year','btn-all', 'btn-custom'].forEach(id=>{ 
-            const btn = document.getElementById(id);
-            if(btn) { btn.classList.remove('btn-primary'); btn.classList.add('btn-secondary'); }
-        });
+        if (term) customers = customers.filter(c => c.phone.includes(term) || c.name.toLowerCase().includes(term));
         
-        if (period === 'custom') {
-            document.getElementById('btn-custom').classList.add('btn-primary');
-            document.getElementById('customFilterArea').classList.add('active');
-        } else {
-            const activeBtn = document.getElementById('btn-'+period);
-            if(activeBtn) { activeBtn.classList.remove('btn-secondary'); activeBtn.classList.add('btn-primary'); }
-            document.getElementById('customFilterArea').classList.remove('active');
+        if(customers.length === 0) { 
+            listDiv.innerHTML = '<div style="padding:15px;text-align:center;color:#999">Chưa có khách hàng</div>'; 
+            return; 
         }
-
-        // Date Logic
-        let startDate, endDate;
-        const now = new Date();
-        now.setHours(0,0,0,0); // Start of today
-
-        if (period === 'today') {
-            startDate = new Date(now);
-            endDate = new Date(now); endDate.setHours(23,59,59,999);
-        } else if (period === 'week') {
-            startDate = new Date(now); startDate.setDate(now.getDate() - now.getDay() + 1); // Monday
-            endDate = new Date(now); endDate.setHours(23,59,59,999);
-        } else if (period === 'month') {
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-        } else if (period === 'year') {
-            startDate = new Date(now.getFullYear(), 0, 1);
-            endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-        } else if (period === 'all') {
-            startDate = new Date(1970, 0, 1);
-            endDate = new Date(2100, 0, 1);
-        } else if (period === 'custom') {
-            const s = document.getElementById('filterStart').value;
-            const e = document.getElementById('filterEnd').value;
-            if(!s || !e) { alert('Vui lòng chọn ngày!'); return; }
-            startDate = new Date(s); startDate.setHours(0,0,0,0);
-            endDate = new Date(e); endDate.setHours(23,59,59,999);
-        }
-
-        // Filtering
-        const checkDate = (dateStr) => {
-            if(!dateStr) return false;
-            const d = new Date(dateStr);
-            return d >= startDate && d <= endDate;
-        };
-
-        const orders = loadData(KEYS.ORDERS).filter(o => checkDate(o.date));
-        const cashflow = loadData(KEYS.CASHFLOW).filter(c => checkDate(c.date));
         
-        // Calculating Totals
-        let totalRev = 0, totalCOGS = 0; 
-        orders.forEach(o => { totalRev += o.totalAmount; totalCOGS += (o.cost || 0); });
+        // Sắp xếp khách hàng mới lên đầu
+        customers.reverse();
 
-        let otherIncome = 0, totalExpense = 0; 
-        const rptGenExpTable = document.getElementById('rptGenExpTable').querySelector('tbody');
-        rptGenExpTable.innerHTML = '';
-
-        cashflow.forEach(c => { 
-            if(c.type === 'THU') { otherIncome += c.amount; } 
-            else { 
-                totalExpense += c.amount; 
-                rptGenExpTable.innerHTML += `<tr><td>${new Date(c.date).toLocaleDateString('vi-VN')}</td><td>${c.category}</td><td class="text-right" style="color:red">${formatCurrency(c.amount)}</td></tr>`;
-            }
-        });
-
-        const grossProfit = totalRev - totalCOGS; 
-        const netProfit = grossProfit + otherIncome - totalExpense; 
-        
-        // Update UI Numbers
-        document.getElementById('kpiRevenue').textContent = formatCurrency(totalRev);
-        const stockData = loadData(KEYS.STOCK); 
-        const totalImport = stockData.reduce((sum, s) => sum + (s.quantityIn * s.costPrice), 0);
-        document.getElementById('kpiTotalImport').textContent = formatCurrency(totalImport); 
-        document.getElementById('kpiTotalExpense').textContent = formatCurrency(totalExpense); 
-        document.getElementById('kpiNetProfit').textContent = formatCurrency(netProfit); 
-        document.getElementById('kpiNetProfit').style.color = netProfit >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
-        
-        document.getElementById('rptRev').textContent = formatCurrency(totalRev); 
-        document.getElementById('rptCOGS').textContent = formatCurrency(totalCOGS); 
-        document.getElementById('rptGrossProfit').textContent = formatCurrency(grossProfit); 
-        document.getElementById('rptOtherInc').textContent = formatCurrency(otherIncome); 
-        document.getElementById('rptOtherExp').textContent = formatCurrency(totalExpense); 
-        document.getElementById('rptNetProfit').textContent = formatCurrency(netProfit);
-        
-        const margin = totalRev > 0 ? (netProfit / totalRev) * 100 : 0; 
-        document.getElementById('profitMargin').textContent = margin.toFixed(1) + '%'; 
-        document.getElementById('barProfit').style.width = Math.min(Math.max(margin, 0), 100) + '%';
-        
-        // Tables & Charts
-        const tb = document.getElementById('rptOrdersTable').querySelector('tbody'); tb.innerHTML = ''; 
-        orders.forEach(o => { 
-            const oNet = (o.totalAmount - (o.cost||0)); 
-            tb.innerHTML += `<tr><td>${o.customer.name}</td><td>${o.id}</td><td>${new Date(o.date).toLocaleDateString('vi-VN')}</td><td class="text-right">${formatCurrency(o.totalAmount)}</td><td class="text-right">${formatCurrency(oNet)}</td><td><button class="btn btn-warning btn-sm" onclick="startEditOrder('${o.id}')">Sửa</button> <button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">Hủy</button></td></tr>`; 
-        });
-
-        const tbOrderExp = document.getElementById('rptOrderExpTable').querySelector('tbody'); tbOrderExp.innerHTML = '';
-        orders.filter(o => o.shipping !== 0).forEach(o => {
-             tbOrderExp.innerHTML += `<tr><td>${o.id}</td><td class="text-right">${formatCurrency(Math.abs(o.shipping))}</td><td>${o.shipping > 0 ? 'Thu ship' : 'Trợ giá ship'}</td></tr>`;
-        });
-
-        drawCharts(orders);
+        listDiv.innerHTML = customers.map(c => `
+            <div class="cust-item" onclick="viewCustomerDetail('${c.phone}')">
+                <div class="cust-name">${c.name}</div>
+                <div class="cust-phone">
+                    <span style="color:#666">📱 ${c.phone}</span>
+                </div>
+            </div>
+        `).join('');
     };
 
-    // --- CÁC HÀM CŨ GIỮ NGUYÊN (NHẬP KHO, BÁN HÀNG, SỬA...) ---
-    const submitStockEntry = () => { 
-        const supplier = document.getElementById('stockSupplier').value; 
-        if (!supplier) { alert('Chọn NCC!'); return; } 
-        const rows = document.querySelectorAll('#stockEntryBody tr'); 
-        let stock = loadData(KEYS.STOCK); 
-        let count = 0; 
+    const viewCustomerDetail = (phone) => {
+        // 1. Tìm thông tin khách
+        const customers = loadData(KEYS.CUSTOMERS); 
+        const customer = customers.find(c => c.phone === phone); 
+        if (!customer) {
+            console.error("Không tìm thấy khách hàng với SĐT:", phone);
+            return;
+        }
+
+        // Highlight giao diện bên trái
+        document.querySelectorAll('.cust-item').forEach(el => el.classList.remove('active')); 
+        event.currentTarget.classList.add('active');
         
-        rows.forEach(row => { 
-            const name = row.querySelector('.stock-name').value.trim(); 
-            const qty = parseInt(row.querySelector('.stock-qty').value); 
-            const cost = parseFloat(row.querySelector('.stock-cost').value); 
-            const note = row.querySelector('.stock-note').value; 
-            if(name && qty > 0) { 
-                let item = stock.find(s => s.name === name && parseFloat(s.costPrice) === cost); 
-                if(item) { item.quantityIn += qty; item.supplier = supplier; item.note = note || item.note; } 
-                else { stock.push({name, quantityIn: qty, quantityOut: 0, costPrice: cost, supplier, note}); } 
-                count++; 
-            } 
-        }); 
-        if(count > 0) { saveData(KEYS.STOCK, stock); alert(`Nhập ${count} mã hàng thành công!`); document.getElementById('stockEntryBody').innerHTML = ''; createStockRow(); renderInventory(); updateProductDatalist('productListStock'); } 
+        // 2. Lấy dữ liệu đơn hàng của khách
+        const allOrders = loadData(KEYS.ORDERS);
+        // Lọc đơn hàng có sdt trùng khớp (trim để đảm bảo không lỗi khoảng trắng)
+        const orders = allOrders.filter(o => o.customer.phone.trim() === phone.trim());
+        
+        // Sắp xếp đơn mới nhất lên đầu
+        orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const totalSpent = orders.reduce((sum, o) => sum + o.totalAmount, 0);
+
+        // 3. Render giao diện chi tiết bên phải
+        const detailDiv = document.getElementById('crmDetailView');
+        detailDiv.innerHTML = `
+            <div class="card" style="border-top: 5px solid var(--primary-color);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                    <div>
+                        <h2 style="margin:0; color: #333">${customer.name}</h2>
+                        <div style="color:#666; margin-top:5px; font-size: 14px;">
+                            <div>📍 Địa chỉ: <strong>${customer.address || 'Chưa cập nhật'}</strong></div>
+                            <div>📞 Điện thoại: <strong>${customer.phone}</strong></div>
+                        </div>
+                    </div>
+                    <div style="text-align:right">
+                        <button class="btn btn-warning btn-sm" onclick="startOrderForCustomer('${customer.phone}', '${customer.name}', '${customer.address}')">🛒 Tạo đơn mới</button>
+                    </div>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+
+                <div class="crm-info-box">
+                    <div class="crm-stat-card">
+                        <h4>Tổng Chi Tiêu</h4>
+                        <div>${formatCurrency(totalSpent)}</div>
+                    </div>
+                    <div class="crm-stat-card">
+                        <h4>Số Đơn Hàng</h4>
+                        <div style="color:var(--info-color)">${orders.length}</div>
+                    </div>
+                    <div class="crm-stat-card">
+                        <h4>Lần Cuối Mua</h4>
+                        <div style="color:#666; font-size:16px; margin-top:3px;">${orders.length > 0 ? new Date(orders[0].date).toLocaleDateString('vi-VN') : 'Chưa mua'}</div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0; color: var(--primary-color);">📜 Lịch sử mua hàng</h4>
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Ngày mua</th>
+                            <th>Sản phẩm</th>
+                            <th class="text-right">Tổng tiền</th>
+                            <th class="text-center">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orders.length > 0 ? orders.map(o => {
+                            // Tóm tắt tên sản phẩm
+                            const summary = o.items.map(i => `${i.name.split('{')[0]} (x${i.quantity})`).join(', ');
+                            return `
+                                <tr>
+                                    <td><span style="font-weight:bold; color:var(--primary-color)">${o.id}</span></td>
+                                    <td>${new Date(o.date).toLocaleDateString('vi-VN')}</td>
+                                    <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis" title="${summary}">${summary}</td>
+                                    <td class="text-right" style="font-weight:bold">${formatCurrency(o.totalAmount)}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-secondary btn-sm" onclick="startEditOrder('${o.id}')">Xem/Sửa</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('') : '<tr><td colspan="5" class="text-center" style="padding:20px; color:#999">Chưa có đơn hàng nào được ghi nhận.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    };
+    
+    // Hàm phụ trợ: Nhảy sang tab bán hàng và điền sẵn thông tin khách
+    const startOrderForCustomer = (phone, name, addr) => {
+        switchTab('tab-sales');
+        document.getElementById('custPhone').value = phone;
+        document.getElementById('custName').value = name;
+        document.getElementById('custAddress').value = addr || '';
+        updateInvoicePreview();
     };
 
-    const updateProductDatalist = (el) => {
-        const stock = loadData(KEYS.STOCK); const list = document.getElementById(el); 
-        if(list) { list.innerHTML = stock.map(s => `<option value="${s.name} {V:${s.costPrice}}">Tồn: ${s.quantityIn - s.quantityOut} - Vốn: ${formatCurrency(s.costPrice)}</option>`).join(''); }
-    }
-
+    // --- LOGIC BÁN HÀNG & LƯU ĐƠN (UPDATED) ---
     const submitOrder = () => {
-        const rows = document.querySelectorAll('#orderItemsBody tr'); let items = [], totalCost = 0, totalRev = 0; let stockData = loadData(KEYS.STOCK);
+        const rows = document.querySelectorAll('#orderItemsBody tr');
+        let items = [], totalCost = 0, totalRev = 0; let stockData = loadData(KEYS.STOCK);
         for(let row of rows) { 
-            const inputName = row.querySelector('.item-name').value; const qty = parseFloat(row.querySelector('.item-qty').value); const price = parseFloat(row.querySelector('.item-price').value); 
-            if(!inputName || qty <= 0) { alert('Kiểm tra lại SP!'); return; } 
+            const inputName = row.querySelector('.item-name').value; 
+            const qty = parseFloat(row.querySelector('.item-qty').value); 
+            const price = parseFloat(row.querySelector('.item-price').value); 
+            if(!inputName || qty <= 0) { alert('Kiểm tra lại tên SP hoặc Số lượng!'); return; } 
             const prod = stockData.find(s => `${s.name} {V:${s.costPrice}}` === inputName);
             if(prod) { totalCost += (qty * prod.costPrice); } 
             items.push({name: inputName, quantity: qty, price}); totalRev += (qty * price); 
         }
-        if(items.length===0) return; 
+        if(items.length === 0) return; 
         const ship = parseFloat(document.getElementById('shippingCost').value)||0;
+        const custName = document.getElementById('custName').value.trim();
+        const custPhone = document.getElementById('custPhone').value.trim();
+        const custAddr = document.getElementById('custAddress').value.trim();
+        const staffName = document.getElementById('saleStaffSelect').value;
+        if(!custPhone) { alert("Vui lòng nhập SĐT Khách hàng!"); return; }
         const selectedDate = document.getElementById('orderDate').value;
         const orderDate = selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString();
-        const order = { id: document.getElementById('invID').textContent, date: orderDate, customer: { name: document.getElementById('custName').value, phone: document.getElementById('custPhone').value, address: document.getElementById('custAddress').value }, staff: document.getElementById('saleStaffSelect').value, items, shipping: ship, totalAmount: totalRev + ship, cost: totalCost };
+        const order = { id: document.getElementById('invID').textContent, date: orderDate, customer: { name: custName, phone: custPhone, address: custAddr }, staff: staffName, items, shipping: ship, totalAmount: totalRev + ship, cost: totalCost };
         
         let orders = loadData(KEYS.ORDERS);
         if(editingOrderId) { 
-            const old = orders.find(o => o.id === editingOrderId); 
-            old.items.forEach(i => { const p = stockData.find(s => `${s.name} {V:${s.costPrice}}` === i.name); if(p) p.quantityOut -= i.quantity; }); 
-            items.forEach(i => { const p = stockData.find(s => `${s.name} {V:${s.costPrice}}` === i.name); if(p) p.quantityOut += i.quantity; }); 
-            orders[orders.findIndex(o => o.id === editingOrderId)] = order; alert('Cập nhật xong!'); 
+            const oldIdx = orders.findIndex(o => o.id === editingOrderId);
+            if (oldIdx !== -1) {
+                orders[oldIdx].items.forEach(i => { const p = stockData.find(s => `${s.name} {V:${s.costPrice}}` === i.name); if(p) p.quantityOut -= i.quantity; }); 
+                items.forEach(i => { const p = stockData.find(s => `${s.name} {V:${s.costPrice}}` === i.name); if(p) p.quantityOut += i.quantity; }); 
+                orders[oldIdx] = order; alert('Cập nhật đơn hàng thành công!'); 
+            }
         } else { 
             items.forEach(i => { const p = stockData.find(s => `${s.name} {V:${s.costPrice}}` === i.name); if(p) p.quantityOut += i.quantity; }); 
-            if(order.customer.phone) { let custs = loadData(KEYS.CUSTOMERS); let c = custs.find(x=>x.phone===order.customer.phone); if(!c) custs.push({name:order.customer.name, phone:order.customer.phone, address:order.customer.address, note:''}); saveData(KEYS.CUSTOMERS, custs); } 
-            orders.push(order); alert('Lưu đơn mới!'); 
+            orders.push(order); alert('Lưu đơn mới thành công!'); 
         }
+
+        // Cập nhật CRM (Logic sửa: Tìm đúng SĐT để update hoặc thêm mới)
+        let customers = loadData(KEYS.CUSTOMERS);
+        let existingCustIndex = customers.findIndex(c => c.phone === custPhone);
+        if (existingCustIndex >= 0) { 
+            customers[existingCustIndex].name = custName; 
+            customers[existingCustIndex].address = custAddr; 
+        } else { 
+            customers.push({name: custName, phone: custPhone, address: custAddr, note: ''}); 
+        }
+        saveData(KEYS.CUSTOMERS, customers);
+
         saveData(KEYS.STOCK, stockData); saveData(KEYS.ORDERS, orders); cancelEditOrder();
     };
 
-    const updateInvoicePreview = () => {
-        const id = editingOrderId || (document.getElementById('orderIDDisplay')?.value || generateID()); document.getElementById('invID').textContent = id; 
-        const inputDate = document.getElementById('orderDate').value; document.getElementById('invDate').textContent = inputDate ? new Date(inputDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN');
-        const staffSel = document.getElementById('saleStaffSelect'); document.getElementById('invStaff').textContent = staffSel.value || '...';
-        const s = loadData(KEYS.STAFF).find(x => x.name === staffSel.value); document.getElementById('invStaffPhone').textContent = s ? s.phone : '...';
-        document.getElementById('invCustName').textContent = document.getElementById('custName').value || '...'; document.getElementById('invCustPhone').textContent = document.getElementById('custPhone').value || '...'; document.getElementById('invCustAddr').textContent = document.getElementById('custAddress').value || '...';
-        let subTotal = 0, htmlRows = '', stt = 1; 
-        document.querySelectorAll('#orderItemsBody tr').forEach(row => { 
-            const rawName = row.querySelector('.item-name').value; const displayName = rawName.split(' {V:')[0];
-            const qty = parseFloat(row.querySelector('.item-qty').value)||0; const price = parseFloat(row.querySelector('.item-price').value)||0; const total = qty * price; 
-            if(rawName) { subTotal += total; htmlRows += `<tr><td class="text-center">${stt++}</td><td>${displayName}</td><td class="text-center">Cái</td><td class="text-center">${qty}</td><td class="text-right">${formatCurrency(price).replace('₫','')}</td><td class="text-right">${formatCurrency(total).replace('₫','')}</td></tr>`; } 
-        });
-        document.getElementById('invItemsList').innerHTML = htmlRows; document.getElementById('invSubTotal').textContent = formatCurrency(subTotal); 
-        const ship = parseFloat(document.getElementById('shippingCost').value)||0; document.getElementById('invShip').textContent = formatCurrency(ship); document.getElementById('invTotal').textContent = formatCurrency(subTotal+ship); document.getElementById('invTotalText').textContent = "(Bằng chữ)";
+    // --- CÁC LOGIC KHÁC GIỮ NGUYÊN ---
+    let currentReportPeriod = 'today'; 
+    const toggleCustomFilter = () => { const area = document.getElementById('customFilterArea'); const btn = document.getElementById('btn-custom'); if (area.classList.contains('active')) { area.classList.remove('active'); btn.classList.remove('btn-primary'); btn.classList.add('btn-secondary'); } else { area.classList.add('active'); } };
+    const filterReports = (period) => {
+        currentReportPeriod = period;
+        ['btn-today','btn-week','btn-month','btn-year','btn-all', 'btn-custom'].forEach(id=>{ const btn = document.getElementById(id); if(btn) { btn.classList.remove('btn-primary'); btn.classList.add('btn-secondary'); } });
+        if (period === 'custom') { document.getElementById('btn-custom').classList.add('btn-primary'); document.getElementById('customFilterArea').classList.add('active'); } 
+        else { const activeBtn = document.getElementById('btn-'+period); if(activeBtn) { activeBtn.classList.remove('btn-secondary'); activeBtn.classList.add('btn-primary'); } document.getElementById('customFilterArea').classList.remove('active'); }
+        let startDate, endDate; const now = new Date(); now.setHours(0,0,0,0);
+        if (period === 'today') { startDate = new Date(now); endDate = new Date(now); endDate.setHours(23,59,59,999); } 
+        else if (period === 'week') { startDate = new Date(now); startDate.setDate(now.getDate() - now.getDay() + 1); endDate = new Date(now); endDate.setHours(23,59,59,999); } 
+        else if (period === 'month') { startDate = new Date(now.getFullYear(), now.getMonth(), 1); endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59); } 
+        else if (period === 'year') { startDate = new Date(now.getFullYear(), 0, 1); endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59); } 
+        else if (period === 'all') { startDate = new Date(1970, 0, 1); endDate = new Date(2100, 0, 1); } 
+        else if (period === 'custom') { const s = document.getElementById('filterStart').value; const e = document.getElementById('filterEnd').value; if(!s || !e) { alert('Vui lòng chọn ngày!'); return; } startDate = new Date(s); startDate.setHours(0,0,0,0); endDate = new Date(e); endDate.setHours(23,59,59,999); }
+        const checkDate = (dateStr) => { if(!dateStr) return false; const d = new Date(dateStr); return d >= startDate && d <= endDate; };
+        const orders = loadData(KEYS.ORDERS).filter(o => checkDate(o.date));
+        const cashflow = loadData(KEYS.CASHFLOW).filter(c => checkDate(c.date));
+        let totalRev = 0, totalCOGS = 0; orders.forEach(o => { totalRev += o.totalAmount; totalCOGS += (o.cost || 0); });
+        let otherIncome = 0, totalExpense = 0; const rptGenExpTable = document.getElementById('rptGenExpTable').querySelector('tbody'); rptGenExpTable.innerHTML = '';
+        cashflow.forEach(c => { if(c.type === 'THU') { otherIncome += c.amount; } else { totalExpense += c.amount; rptGenExpTable.innerHTML += `<tr><td>${new Date(c.date).toLocaleDateString('vi-VN')}</td><td>${c.category}</td><td class="text-right" style="color:red">${formatCurrency(c.amount)}</td></tr>`; } });
+        const grossProfit = totalRev - totalCOGS; const netProfit = grossProfit + otherIncome - totalExpense; 
+        document.getElementById('kpiRevenue').textContent = formatCurrency(totalRev);
+        const stockData = loadData(KEYS.STOCK); const totalImport = stockData.reduce((sum, s) => sum + (s.quantityIn * s.costPrice), 0);
+        document.getElementById('kpiTotalImport').textContent = formatCurrency(totalImport); document.getElementById('kpiTotalExpense').textContent = formatCurrency(totalExpense); document.getElementById('kpiNetProfit').textContent = formatCurrency(netProfit); document.getElementById('kpiNetProfit').style.color = netProfit >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+        document.getElementById('rptRev').textContent = formatCurrency(totalRev); document.getElementById('rptCOGS').textContent = formatCurrency(totalCOGS); document.getElementById('rptGrossProfit').textContent = formatCurrency(grossProfit); document.getElementById('rptOtherInc').textContent = formatCurrency(otherIncome); document.getElementById('rptOtherExp').textContent = formatCurrency(totalExpense); document.getElementById('rptNetProfit').textContent = formatCurrency(netProfit);
+        const margin = totalRev > 0 ? (netProfit / totalRev) * 100 : 0; document.getElementById('profitMargin').textContent = margin.toFixed(1) + '%'; document.getElementById('barProfit').style.width = Math.min(Math.max(margin, 0), 100) + '%';
+        const tb = document.getElementById('rptOrdersTable').querySelector('tbody'); tb.innerHTML = ''; orders.forEach(o => { const oNet = (o.totalAmount - (o.cost||0)); tb.innerHTML += `<tr><td>${o.customer.name}</td><td>${o.id}</td><td>${new Date(o.date).toLocaleDateString('vi-VN')}</td><td class="text-right">${formatCurrency(o.totalAmount)}</td><td class="text-right">${formatCurrency(oNet)}</td><td><button class="btn btn-warning btn-sm" onclick="startEditOrder('${o.id}')">Sửa</button> <button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">Hủy</button></td></tr>`; });
+        const tbOrderExp = document.getElementById('rptOrderExpTable').querySelector('tbody'); tbOrderExp.innerHTML = ''; orders.filter(o => o.shipping !== 0).forEach(o => { tbOrderExp.innerHTML += `<tr><td>${o.id}</td><td class="text-right">${formatCurrency(Math.abs(o.shipping))}</td><td>${o.shipping > 0 ? 'Thu ship' : 'Trợ giá ship'}</td></tr>`; });
+        drawCharts(orders);
     };
 
+    const submitStockEntry = () => { const supplier = document.getElementById('stockSupplier').value; if (!supplier) { alert('Chọn NCC!'); return; } const rows = document.querySelectorAll('#stockEntryBody tr'); let stock = loadData(KEYS.STOCK); let count = 0; rows.forEach(row => { const name = row.querySelector('.stock-name').value.trim(); const qty = parseInt(row.querySelector('.stock-qty').value); const cost = parseFloat(row.querySelector('.stock-cost').value); const note = row.querySelector('.stock-note').value; if(name && qty > 0) { let item = stock.find(s => s.name === name && parseFloat(s.costPrice) === cost); if(item) { item.quantityIn += qty; item.supplier = supplier; item.note = note || item.note; } else { stock.push({name, quantityIn: qty, quantityOut: 0, costPrice: cost, supplier, note}); } count++; } }); if(count > 0) { saveData(KEYS.STOCK, stock); alert(`Nhập ${count} mã hàng thành công!`); document.getElementById('stockEntryBody').innerHTML = ''; createStockRow(); renderInventory(); updateProductDatalist('productListStock'); } };
+    const updateProductDatalist = (el) => { const stock = loadData(KEYS.STOCK); const list = document.getElementById(el); if(list) { list.innerHTML = stock.map(s => `<option value="${s.name} {V:${s.costPrice}}">Tồn: ${s.quantityIn - s.quantityOut} - Vốn: ${formatCurrency(s.costPrice)}</option>`).join(''); } }
+    const updateInvoicePreview = () => { const id = editingOrderId || (document.getElementById('orderIDDisplay')?.value || generateID()); document.getElementById('invID').textContent = id; const inputDate = document.getElementById('orderDate').value; document.getElementById('invDate').textContent = inputDate ? new Date(inputDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'); const staffSel = document.getElementById('saleStaffSelect'); document.getElementById('invStaff').textContent = staffSel.value || '...'; const s = loadData(KEYS.STAFF).find(x => x.name === staffSel.value); document.getElementById('invStaffPhone').textContent = s ? s.phone : '...'; document.getElementById('invCustName').textContent = document.getElementById('custName').value || '...'; document.getElementById('invCustPhone').textContent = document.getElementById('custPhone').value || '...'; document.getElementById('invCustAddr').textContent = document.getElementById('custAddress').value || '...'; let subTotal = 0, htmlRows = '', stt = 1; document.querySelectorAll('#orderItemsBody tr').forEach(row => { const rawName = row.querySelector('.item-name').value; const displayName = rawName.split(' {V:')[0]; const qty = parseFloat(row.querySelector('.item-qty').value)||0; const price = parseFloat(row.querySelector('.item-price').value)||0; const total = qty * price; if(rawName) { subTotal += total; htmlRows += `<tr><td class="text-center">${stt++}</td><td>${displayName}</td><td class="text-center">Cái</td><td class="text-center">${qty}</td><td class="text-right">${formatCurrency(price).replace('₫','')}</td><td class="text-right">${formatCurrency(total).replace('₫','')}</td></tr>`; } }); document.getElementById('invItemsList').innerHTML = htmlRows; document.getElementById('invSubTotal').textContent = formatCurrency(subTotal); const ship = parseFloat(document.getElementById('shippingCost').value)||0; document.getElementById('invShip').textContent = formatCurrency(ship); document.getElementById('invTotal').textContent = formatCurrency(subTotal+ship); document.getElementById('invTotalText').textContent = "(Bằng chữ)"; };
     const createOrderItemRow = (p='', q=1, pr=0) => {const tbody = document.getElementById('orderItemsBody'); const row = tbody.insertRow(); row.innerHTML = `<td><input type="text" class="form-control item-name" list="productListSales" value="${p}" placeholder="Gõ tên..." onchange="updateInvoicePreview()"></td><td><input type="number" class="form-control item-qty" value="${q}" oninput="updateInvoicePreview()"></td><td><input type="number" class="form-control item-price" value="${pr||''}" placeholder="0" oninput="updateInvoicePreview()"></td><td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); updateInvoicePreview()">x</button></td>`;};
     const startEditOrder = (id) => { const o = loadData(KEYS.ORDERS).find(x=>x.id===id); if(!o) return; switchTab('tab-sales'); editingOrderId = id; document.getElementById('editModeBanner').style.display='block'; document.getElementById('editingOrderIDText').textContent = id; document.getElementById('btnSaveOrder').textContent = "💾 CẬP NHẬT"; document.getElementById('btnSaveOrder').classList.replace('btn-primary','btn-warning'); document.getElementById('btnCancelEdit').style.display = 'inline-block'; document.getElementById('custPhone').value = o.customer.phone; document.getElementById('custName').value = o.customer.name; document.getElementById('custAddress').value = o.customer.address; document.getElementById('shippingCost').value = o.shipping; const sel = document.getElementById('saleStaffSelect'); sel.value = o.staff; document.getElementById('orderItemsBody').innerHTML=''; o.items.forEach(i=>createOrderItemRow(i.name, i.quantity, i.price)); if(o.date) document.getElementById('orderDate').value = new Date(o.date).toISOString().slice(0,10); updateInvoicePreview(); }
     const cancelEditOrder = () => { editingOrderId = null; document.getElementById('editModeBanner').style.display='none'; document.getElementById('btnSaveOrder').textContent = "✅ LƯU ĐƠN"; document.getElementById('btnSaveOrder').classList.replace('btn-warning','btn-primary'); document.getElementById('btnCancelEdit').style.display='none'; document.getElementById('custPhone').value=''; document.getElementById('custName').value=''; document.getElementById('custAddress').value=''; document.getElementById('shippingCost').value=0; document.getElementById('orderItemsBody').innerHTML=''; createOrderItemRow(); document.getElementById('orderDate').value = new Date().toISOString().slice(0,10); updateInvoicePreview(); }
